@@ -4,6 +4,56 @@ import math
 import array
 
 _sounds: dict = {}
+_mus_channel = None
+
+
+def _musica_fundo(vol=1.0):
+    """
+    Musica de fundo alegre (loop de 8s): melodia em Do maior + baixo I-IV-V.
+    Gerada por notas cacheadas para o init ficar rapido.
+    """
+    sr   = 44100
+    # Melodia: 32 colcheias de 0.25s (0 = pausa)
+    MEL  = [523, 587, 659, 784,  659, 587, 523, 587,
+            659, 784, 880, 784,  659, 523, 587, 0,
+            523, 587, 659, 784,  880, 784, 659, 784,
+            1047, 880, 784, 659, 587, 659, 523, 0]
+    # Baixo: 16 minimas de 0.5s (C / F / G)
+    BAIXO = [131, 131, 175, 175, 131, 131, 196, 196,
+             131, 131, 175, 175, 196, 196, 131, 131]
+
+    cache = {}
+    def nota(freq, dur, v):
+        key = (freq, dur, v)
+        if key in cache:
+            return cache[key]
+        n   = int(sr * dur)
+        out = array.array('h', bytes(2 * n))
+        if freq:
+            for i in range(n):
+                t    = i / sr
+                frac = i / max(n - 1, 1)
+                env  = min(1.0, frac * 22) * (1.0 - frac) ** 0.4
+                out[i] = int((math.sin(2 * math.pi * freq * t)
+                              + 0.35 * math.sin(4 * math.pi * freq * t))
+                             * env * v * 32767)
+        cache[key] = out
+        return out
+
+    mel = array.array('h')
+    for f in MEL:
+        mel.extend(nota(f, 0.25, 0.34 * vol))
+    baixo = array.array('h')
+    for f in BAIXO:
+        baixo.extend(nota(f, 0.5, 0.24 * vol))
+
+    n   = min(len(mel), len(baixo))
+    buf = array.array('h')
+    for i in range(n):
+        v = max(-32767, min(32767, mel[i] + baixo[i]))
+        buf.append(v)
+        buf.append(v)   # stereo
+    return pygame.mixer.Sound(buffer=buf)
 
 
 def _buf(pts, dur, vol=0.35):
@@ -93,10 +143,31 @@ def init():
         'encaixe':  _buf([(0, 520), (0.5, 660), (1, 520)],  0.10, 0.30),
         # Click neutro de UI
         'click':    _buf([(0, 460), (1, 460)],               0.05, 0.18),
+        # Musica de fundo alegre (loop durante as fases)
+        'musica':   _musica_fundo(),
     }
+    _sounds['musica'].set_volume(0.32)
 
 
 def play(name: str):
     s = _sounds.get(name)
     if s:
         s.play()
+
+
+def musica_start():
+    """Comeca a musica de fundo em loop (idempotente entre fases)."""
+    global _mus_channel
+    s = _sounds.get('musica')
+    if not s:
+        return
+    if _mus_channel is not None and _mus_channel.get_busy():
+        return
+    _mus_channel = s.play(loops=-1)
+
+
+def musica_stop():
+    global _mus_channel
+    if _mus_channel is not None:
+        _mus_channel.stop()
+        _mus_channel = None

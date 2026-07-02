@@ -2,6 +2,7 @@ import pygame
 import math
 from engine.scene_manager import Scene
 from engine.ui import Button
+import engine.sounds as snd
 from constants import *
 import characters.sprites as spr
 
@@ -13,6 +14,7 @@ class MenuScene(Scene):
         self.buttons = []
 
     def on_enter(self):
+        snd.musica_stop()
         self.frame = 0
 
         self.font_title = pygame.font.SysFont("Segoe UI", 68, bold=True)

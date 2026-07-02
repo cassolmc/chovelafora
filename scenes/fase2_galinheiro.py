@@ -156,6 +156,7 @@ class Fase2Scene(Scene):
         self.drag     = None
         self.complete = False
         self.font_tag = pygame.font.SysFont("Segoe UI", 15, bold=True)
+        self._bg      = None   # fundo estatico em cache
 
         # Gilson walk-in animation
         self.gilson_x   = float(SCREEN_W + 60)
@@ -166,6 +167,7 @@ class Fase2Scene(Scene):
         self.banana_y = self.gilson_y - 60
 
     def on_enter(self):
+        snd.musica_start()
         self.frame    = 0
         self.state    = "intro"
         self.complete = False
@@ -264,31 +266,36 @@ class Fase2Scene(Scene):
     # ----------------------------------------------------------------- draw
     def _draw_bg(self, screen):
         w, h = SCREEN_W, SCREEN_H
-        # Ceu
-        for sy in range(328):
-            t = sy / 328
-            pygame.draw.line(screen,
-                (int(95 + 118 * t), int(158 + 68 * t), int(215 + 25 * t)),
-                (0, sy), (w, sy))
-        # Nuvens
+        # Parte estatica em cache (performance no celular)
+        if self._bg is None:
+            self._bg = pygame.Surface((w, h))
+            bg = self._bg
+            # Ceu
+            for sy in range(328):
+                t = sy / 328
+                pygame.draw.line(bg,
+                    (int(95 + 118 * t), int(158 + 68 * t), int(215 + 25 * t)),
+                    (0, sy), (w, sy))
+            # Floresta
+            morro = [(0,270),(0,195),(90,168),(260,182),(450,155),(640,170),(840,150),(1050,168),(w,158),(w,270)]
+            pygame.draw.polygon(bg, (18, 56, 14), morro)
+            for tx in range(-20, w + 50, 52):
+                th = 48 + (tx * 7 % 5) * 12
+                ty = 148 + (tx * 3 % 7) * 4
+                pygame.draw.rect(bg, (48, 28, 8), (tx + 22, ty + th // 2, 7, th // 2))
+                pygame.draw.circle(bg, (14 + tx % 5 * 4, 50 + tx % 4 * 7, 12), (tx + 26, ty + th // 3), th // 3)
+            # Gramado
+            pygame.draw.rect(bg, (64, 140, 44), (0, 326, w, h - 326))
+            pygame.draw.rect(bg, (76, 154, 52), (0, 326, w, 28))
+            for gx in range(0, w, 16):
+                pygame.draw.line(bg, (48, 118, 34), (gx, 348), (gx + 3, 340), 1)
+        screen.blit(self._bg, (0, 0))
+        # Nuvens (unica parte animada)
         ox = int((self.frame * 0.18) % (w + 300)) - 150
         for ccx, ccy, cr in [(ox, 55, 40), (ox + 280, 72, 30), (ox + 580, 50, 46)]:
             cl = (238, 242, 248)
             pygame.draw.ellipse(screen, cl, (ccx - cr, ccy - cr // 2, cr * 2, cr))
             pygame.draw.ellipse(screen, cl, (ccx - cr // 2, ccy - cr, cr, cr))
-        # Floresta
-        morro = [(0,270),(0,195),(90,168),(260,182),(450,155),(640,170),(840,150),(1050,168),(w,158),(w,270)]
-        pygame.draw.polygon(screen, (18, 56, 14), morro)
-        for tx in range(-20, w + 50, 52):
-            th = 48 + (tx * 7 % 5) * 12
-            ty = 148 + (tx * 3 % 7) * 4
-            pygame.draw.rect(screen, (48, 28, 8), (tx + 22, ty + th // 2, 7, th // 2))
-            pygame.draw.circle(screen, (14 + tx % 5 * 4, 50 + tx % 4 * 7, 12), (tx + 26, ty + th // 3), th // 3)
-        # Gramado
-        pygame.draw.rect(screen, (64, 140, 44), (0, 326, w, h - 326))
-        pygame.draw.rect(screen, (76, 154, 52), (0, 326, w, 28))
-        for gx in range(0, w, 16):
-            pygame.draw.line(screen, (48, 118, 34), (gx, 348), (gx + 3, 340), 1)
 
     def _draw_tarp(self, screen):
         """Lona de materiais onde as pecas ficam empilhadas."""

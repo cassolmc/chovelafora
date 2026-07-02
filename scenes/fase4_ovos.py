@@ -168,8 +168,10 @@ class Fase4Scene(Scene):
         self.font_hint = pygame.font.SysFont("Segoe UI", 19, bold=True)
         self.hops     = [0.0] * len(NINHOS)
         self.textos   = []   # [x, y, txt, cor, t]
+        self._bg      = None   # fundo estatico em cache
 
     def on_enter(self):
+        snd.musica_start()
         self.frame    = 0
         self.state    = "intro"
         self.complete = False
@@ -289,6 +291,13 @@ class Fase4Scene(Scene):
 
     # ----------------------------------------------------------------- draw
     def _draw_bg(self, screen):
+        # Fundo 100% estatico: desenha uma vez e reusa (performance no celular)
+        if self._bg is None:
+            self._bg = pygame.Surface((SCREEN_W, SCREEN_H))
+            self._render_bg(self._bg)
+        screen.blit(self._bg, (0, 0))
+
+    def _render_bg(self, screen):
         w, h = SCREEN_W, SCREEN_H
         # Parede de tabuas do galinheiro (estamos la dentro!)
         screen.fill((198, 152, 98))

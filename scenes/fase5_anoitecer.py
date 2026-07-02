@@ -90,8 +90,10 @@ class Fase5Scene(Scene):
         self.vagalumes = [(random.randint(60, 1220), random.randint(100, 540),
                            random.uniform(0, 6.28), random.uniform(0.6, 1.4))
                           for _ in range(9)]
+        self._bg = None   # quintal estatico em cache
 
     def on_enter(self):
+        snd.musica_start()
         self.frame    = 0
         self.state    = "intro"
         self.complete = False
@@ -363,6 +365,13 @@ class Fase5Scene(Scene):
 
     # ----------------------------------------------------------------- draw
     def _draw_quintal(self, screen):
+        # Quintal 100% estatico: desenha uma vez e reusa (performance no celular)
+        if self._bg is None:
+            self._bg = pygame.Surface((SCREEN_W, SCREEN_H))
+            self._render_quintal(self._bg)
+        screen.blit(self._bg, (0, 0))
+
+    def _render_quintal(self, screen):
         w, h = SCREEN_W, SCREEN_H
         # Gramado visto de cima, com faixas de corte
         screen.fill((72, 148, 50))

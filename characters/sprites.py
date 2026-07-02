@@ -362,16 +362,19 @@ def draw_galinha(surf, x, y, body_color, crest_color=RED, frame=0, small=False):
 # Baseado nas fotos reais: casa branca telhado escuro, gramado verde intenso,
 # galpao de madeira a direita, carro prata Fiat, floresta densa, muro de pedra
 # ---------------------------------------------------------------------------
+_SITIO_CACHE = None
+
+
 def draw_sitio_exterior(surf, frame=0):
+    """Fundo do sitio. A parte estatica e desenhada UMA vez num cache
+    (importante para rodar liso no celular); so as nuvens sao animadas."""
+    global _SITIO_CACHE
     w = surf.get_width()
     h = surf.get_height()
-
-    # ------------------------------------------------------------------ CEU
-    sky_h = 318
-    for sy in range(sky_h):
-        t   = sy / sky_h
-        col = (int(95 + 118 * t), int(158 + 68 * t), int(215 + 25 * t))
-        pygame.draw.line(surf, col, (0, sy), (w, sy))
+    if _SITIO_CACHE is None or _SITIO_CACHE.get_size() != (w, h):
+        _SITIO_CACHE = pygame.Surface((w, h))
+        _sitio_estatico(_SITIO_CACHE, w, h)
+    surf.blit(_SITIO_CACHE, (0, 0))
 
     # Nuvens (duas camadas de elipses sobrepostas, movimento lento)
     cloud_ox = int((frame * 0.22) % (w + 400)) - 200
@@ -381,6 +384,15 @@ def draw_sitio_exterior(surf, frame=0):
         pygame.draw.ellipse(surf, cl, (ccx - cr,       ccy - cr // 2, cr * 2,       cr))
         pygame.draw.ellipse(surf, cl, (ccx - cr // 2,  ccy - cr,      cr,            cr))
         pygame.draw.ellipse(surf, cl, (ccx + cr // 4,  ccy - cr * 3 // 4, cr * 3 // 2, cr * 3 // 4))
+
+
+def _sitio_estatico(surf, w, h):
+    # ------------------------------------------------------------------ CEU
+    sky_h = 318
+    for sy in range(sky_h):
+        t   = sy / sky_h
+        col = (int(95 + 118 * t), int(158 + 68 * t), int(215 + 25 * t))
+        pygame.draw.line(surf, col, (0, sy), (w, sy))
 
     # ------------------------------------------------------------------ FLORESTA (fundo)
     morro = [

@@ -128,6 +128,7 @@ class Fase1Scene(Scene):
         ]
 
     def on_enter(self):
+        snd.musica_start()
         self.frame    = 0
         self.state    = "intro"
         self.gavioes  = []

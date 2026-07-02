@@ -248,8 +248,10 @@ class Fase3Scene(Scene):
         self.font_lbl = pygame.font.SysFont("Segoe UI", 14, bold=True)
         self.font_msg = pygame.font.SysFont("Segoe UI", 46, bold=True)
         self.font_hint = pygame.font.SysFont("Segoe UI", 19, bold=True)
+        self._bg       = None   # fundo estatico em cache
 
     def on_enter(self):
+        snd.musica_start()
         self.frame    = 0
         self.state    = "intro"
         self.complete = False
@@ -370,6 +372,13 @@ class Fase3Scene(Scene):
 
     # ----------------------------------------------------------------- draw
     def _draw_bg(self, screen):
+        # Fundo 100% estatico: desenha uma vez e reusa (performance no celular)
+        if self._bg is None:
+            self._bg = pygame.Surface((SCREEN_W, SCREEN_H))
+            self._render_bg(self._bg)
+        screen.blit(self._bg, (0, 0))
+
+    def _render_bg(self, screen):
         w, h = SCREEN_W, SCREEN_H
         # Ceu
         for sy in range(330):
