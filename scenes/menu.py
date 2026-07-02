@@ -1,10 +1,15 @@
 import pygame
 import math
+import sys
 from engine.scene_manager import Scene
 from engine.ui import Button
 import engine.sounds as snd
 from constants import *
 import characters.sprites as spr
+
+# No navegador nao existe "sair" - fecha-se a aba/app. Matar o Python
+# (pygame.quit) so deixaria um canvas cinza morto.
+IS_WEB = sys.platform == "emscripten"
 
 
 class MenuScene(Scene):
@@ -20,15 +25,19 @@ class MenuScene(Scene):
         self.font_title = pygame.font.SysFont("Segoe UI", 68, bold=True)
         self.font_sub   = pygame.font.SysFont("Segoe UI", 28)
 
+        jogar_y = SCREEN_H // 2 + 85 if IS_WEB else SCREEN_H // 2 + 55
         self.btn_jogar = Button(
-            (SCREEN_W // 2 - 150, SCREEN_H // 2 + 55, 300, 62),
+            (SCREEN_W // 2 - 150, jogar_y, 300, 62),
             "JOGAR", (55, 155, 55),
         )
-        self.btn_sair = Button(
-            (SCREEN_W // 2 - 150, SCREEN_H // 2 + 137, 300, 52),
-            "Sair", DARK_GRAY,
-        )
-        self.buttons = [self.btn_jogar, self.btn_sair]
+        self.buttons = [self.btn_jogar]
+        self.btn_sair = None
+        if not IS_WEB:
+            self.btn_sair = Button(
+                (SCREEN_W // 2 - 150, SCREEN_H // 2 + 137, 300, 52),
+                "Sair", DARK_GRAY,
+            )
+            self.buttons.append(self.btn_sair)
 
     def handle_event(self, event):
         for btn in self.buttons:
@@ -38,7 +47,7 @@ class MenuScene(Scene):
             self.btn_jogar.reset()
             self.manager.go_to("fase1")
 
-        if self.btn_sair.clicked:
+        if self.btn_sair and self.btn_sair.clicked:
             pygame.event.post(pygame.event.Event(pygame.QUIT))
 
     def update(self, dt):

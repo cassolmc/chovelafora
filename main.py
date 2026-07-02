@@ -46,6 +46,8 @@ async def main():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                if IS_WEB:
+                    continue   # no navegador nao ha "sair" - ignora
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
