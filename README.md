@@ -6,10 +6,12 @@ Feito em Python + Pygame, roda no navegador (desktop e celular) via
 
 ## Jogar no navegador
 
-**https://SEU-USUARIO.github.io/game2/**
+**https://cassolmc.github.io/chovelafora/**
 
 Funciona no Chrome (desktop e Android) e Safari (iOS). No celular é só
 tocar/arrastar — todas as fases jogam com o dedo.
+
+Repositório: https://github.com/cassolmc/chovelafora
 
 ## Rodar localmente
 
