@@ -35,7 +35,6 @@ SPLASH = """<div id="splash">
   <div class="s-mid">
     <h1 class="s-title">Sítio<br>Chove Lá Fora</h1>
     <div class="s-msg">Carregando<span class="s-dots"></span></div>
-    <div class="s-tap">toque ou clique para começar!</div>
   </div>
   <div class="s-grass"></div>
   <div id="s-walk"><img src="splash-ramona.png" alt="Ramona"></div>
@@ -52,9 +51,6 @@ SPLASH = """<div id="splash">
 .s-msg{color:#1d5c1d;font-weight:bold;font-size:clamp(1.1rem,3vw,1.6rem)}
 .s-dots::after{content:"";animation:sdots 1.2s steps(4,end) infinite}
 @keyframes sdots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
-.s-tap{margin-top:1.1rem;color:#fff;font-weight:bold;font-size:clamp(1rem,2.6vw,1.3rem);
-  text-shadow:0 2px 4px rgba(0,0,0,.4);opacity:0;animation:stap 1.4s ease-in-out 4s infinite}
-@keyframes stap{0%,100%{opacity:.15}50%{opacity:1}}
 .s-sun{position:absolute;top:6vh;right:8vw;width:17vmin;height:17vmin;border-radius:50%;
   background:radial-gradient(circle,#fff7c8 30%,#ffe36e 58%,rgba(255,227,110,0) 72%);
   animation:ssun 3.5s ease-in-out infinite}
@@ -86,11 +82,9 @@ SPLASH = """<div id="splash">
     return cv&&(cv.width|0)>64;
   }
   var timer=setInterval(function(){if(jogoAbriu())sair();},300);
-  // Failsafe: nunca prender o jogador no splash - se 12s depois do
-  // primeiro toque o jogo nao abriu, mostra a tela do pygbag por baixo
-  window.addEventListener('pointerdown',function(){
-    setTimeout(function(){if(!jogoAbriu())sair();},12000);
-  },{once:true});
+  // Failsafe: nunca prender o jogador no splash - se em 60s o jogo nao
+  // abriu (conexao ruim/erro), mostra a tela do pygbag por baixo
+  setTimeout(function(){if(!jogoAbriu())sair();},60000);
 })();
 </script>
 <script>
@@ -176,6 +170,12 @@ def main():
             html = f.read()
         assert "</head>" in html, "index.html sem </head>?"
         assert "<body>" in html, "index.html sem <body>?"
+        # Sem "clique para comecar": o jogo inicia sozinho ao terminar de
+        # carregar. O audio destrava no primeiro toque natural (botao JOGAR).
+        assert "ume_block : 1," in html and "autorun : 0," in html, \
+            "config do pygbag mudou? esperava ume_block:1/autorun:0"
+        html = html.replace("ume_block : 1,", "ume_block : 0,", 1)
+        html = html.replace("autorun : 0,", "autorun : 1,", 1)
         html = html.replace("</head>", PWA_TAGS + "</head>", 1)
         html = html.replace("<body>", "<body>\n" + SPLASH, 1)
         with open(index, "w", encoding="utf-8") as f:
