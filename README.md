@@ -29,15 +29,25 @@ python -m pygbag main.py    # navegador em http://localhost:8000
 4. **Catar os Ovos** — pegue 20 ovos que caem dos ninhos em 90s
 5. **Anoitecer** — leve as 8 galinhas pro galinheiro antes de escurecer
 
+## Instalar como app (PWA)
+
+No **Chrome Android**: abra o jogo → menu ⋮ → **"Adicionar à tela inicial"**
+(ou "Instalar app"). No **Safari iOS**: botão compartilhar →
+**"Adicionar à Tela de Início"**. O jogo abre em tela cheia, com ícone
+próprio, como um app nativo.
+
 ## Deploy (GitHub Pages)
 
 O jogo compilado fica em `docs/`. Para atualizar depois de mudar o código:
 
 ```bash
-python -m pygbag --build main.py
-rm -rf docs && mkdir docs && cp -r build/web/* docs/
+python deploy.py
 git add -A && git commit -m "Atualiza build web" && git push
 ```
+
+O `deploy.py` compila com o pygbag numa pasta limpa (só o código do jogo),
+recria `docs/` e injeta o manifest/ícones do PWA no `index.html`.
+Os ícones vêm de `web/` (para regerar: `python web/gen_icons.py`).
 
 No GitHub: **Settings → Pages → Source: Deploy from a branch →
 Branch: `main`, pasta `/docs`**.

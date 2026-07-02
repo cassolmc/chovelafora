@@ -1,0 +1,16 @@
+{
+  "name": "Sítio Chove Lá Fora",
+  "short_name": "Chove Lá Fora",
+  "description": "Jogo da Marina e da galinha punk Ramona no sítio",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#78b6e0",
+  "theme_color": "#2a7d2a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
