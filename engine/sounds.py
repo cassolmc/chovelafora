@@ -2,9 +2,15 @@
 import pygame
 import math
 import array
+import sys
 
 _sounds: dict = {}
 _mus_channel = None
+
+# No navegador a musica continua toca via WebAudio (chvMusica no
+# index.html, injetado pelo deploy.py): loop na thread de audio, sem os
+# estalos do mixer em WASM. Os efeitos curtos continuam no mixer.
+_IS_WEB = sys.platform == "emscripten"
 
 
 def _musica_fundo(vol=1.0):
@@ -145,10 +151,11 @@ def init():
         'encaixe':  _buf([(0, 520), (0.5, 660), (1, 520)],  0.10, 0.30),
         # Click neutro de UI
         'click':    _buf([(0, 460), (1, 460)],               0.05, 0.18),
-        # Musica de fundo alegre (loop durante as fases)
-        'musica':   _musica_fundo(),
     }
-    _sounds['musica'].set_volume(0.32)
+    if not _IS_WEB:
+        # Musica de fundo alegre (loop durante as fases)
+        _sounds['musica'] = _musica_fundo()
+        _sounds['musica'].set_volume(0.32)
 
 
 def play(name: str):
@@ -160,6 +167,13 @@ def play(name: str):
 def musica_start():
     """Comeca a musica de fundo em loop (idempotente entre fases)."""
     global _mus_channel
+    if _IS_WEB:
+        try:
+            import platform
+            platform.window.chvMusica.start()
+        except Exception:
+            pass
+        return
     s = _sounds.get('musica')
     if not s:
         return
@@ -170,6 +184,13 @@ def musica_start():
 
 def musica_stop():
     global _mus_channel
+    if _IS_WEB:
+        try:
+            import platform
+            platform.window.chvMusica.stop()
+        except Exception:
+            pass
+        return
     if _mus_channel is not None:
         _mus_channel.stop()
         _mus_channel = None
