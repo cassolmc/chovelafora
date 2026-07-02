@@ -24,7 +24,7 @@ CHAO_Y    = 505   # altura onde o ovo espatifa
 
 DIALOGO_INTRO = [
     ("Mamae",    "Marina! As galinhas botaram! Hora de catar os ovos!"),
-    ("Narrador", "Mova a Marina com as setas ou o mouse e pegue os ovos antes que caiam!"),
+    ("Narrador", "Arraste o dedo (ou mouse) em QUALQUER lugar da tela: a Marina segue!"),
 ]
 
 DIALOGO_DONE = [
@@ -370,6 +370,13 @@ class Fase4Scene(Scene):
         mx = int(self.marina_x)
         spr.draw_marina(screen, mx, 545, self.frame)
         _draw_cesto(screen, mx, 506, s=1.1)
+
+        # Seta pulsante acima do cesto: acha a Marina mesmo com o dedo na tela
+        if self.state == "playing":
+            ay = 468 + int(math.sin(self.frame * 0.15) * 5)
+            pts = [(mx - 11, ay), (mx + 11, ay), (mx, ay + 14)]
+            pygame.draw.polygon(screen, YELLOW, pts)
+            pygame.draw.polygon(screen, (140, 110, 0), pts, 2)
 
         # Textos flutuantes
         for x, y, txt, cor, t in self.textos:

@@ -33,7 +33,9 @@ def _musica_fundo(vol=1.0):
             for i in range(n):
                 t    = i / sr
                 frac = i / max(n - 1, 1)
-                env  = min(1.0, frac * 22) * (1.0 - frac) ** 0.4
+                # Envelope trapezoidal: sustain continuo com fade de ~11ms
+                # nas pontas - sem vales de silencio nem cliques entre notas
+                env  = min(1.0, frac * 22, (1.0 - frac) * 22)
                 out[i] = int((math.sin(2 * math.pi * freq * t)
                               + 0.35 * math.sin(4 * math.pi * freq * t))
                              * env * v * 32767)

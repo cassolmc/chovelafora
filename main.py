@@ -13,13 +13,19 @@ from scenes.fase4_ovos import Fase4Scene
 from scenes.fase5_anoitecer import Fase5Scene
 
 
+IS_WEB = sys.platform == "emscripten"
+
+
 async def main():
     pygame.init()
-    pygame.mixer.pre_init(44100, -16, 2, 512)
+    # Buffer maior no navegador: evita estalos/flicker no audio (WASM)
+    pygame.mixer.pre_init(44100, -16, 2, 2048 if IS_WEB else 512)
     pygame.mixer.init()
     snd.init()
 
-    flags  = pygame.SCALED
+    # SCALED distorce o aspect ratio no navegador; o template do pygbag
+    # ja escala o canvas mantendo a proporcao
+    flags  = 0 if IS_WEB else pygame.SCALED
     screen = pygame.display.set_mode((SCREEN_W, SCREEN_H), flags)
     pygame.display.set_caption(TITLE)
 
