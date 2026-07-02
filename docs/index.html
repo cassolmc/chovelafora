@@ -335,12 +335,27 @@ function show_infobox() {
 </style>
 <script>
 (function(){
-  var sp=document.getElementById('splash'),cv=document.getElementById('canvas'),fim=false;
-  function sair(){if(fim)return;fim=true;sp.classList.add('out');
-    setTimeout(function(){sp.remove()},700);}
-  new MutationObserver(function(){if((cv.width|0)>64)setTimeout(sair,400);})
-    .observe(cv,{attributes:true,attributeFilter:['width','height']});
-  if((cv.width|0)>64)sair();
+  // Roda antes do #canvas existir no DOM, entao consulta a cada tick
+  // (tambem cobre o caso do runtime trocar o elemento canvas)
+  var fim=false;
+  function sair(){
+    var sp=document.getElementById('splash');
+    if(fim||!sp)return;
+    fim=true;
+    sp.classList.add('out');
+    setTimeout(function(){sp.remove();},700);
+    clearInterval(timer);
+  }
+  function jogoAbriu(){
+    var cv=document.getElementById('canvas');
+    return cv&&(cv.width|0)>64;
+  }
+  var timer=setInterval(function(){if(jogoAbriu())sair();},300);
+  // Failsafe: nunca prender o jogador no splash - se 12s depois do
+  // primeiro toque o jogo nao abriu, mostra a tela do pygbag por baixo
+  window.addEventListener('pointerdown',function(){
+    setTimeout(function(){if(!jogoAbriu())sair();},12000);
+  },{once:true});
 })();
 </script>
 
