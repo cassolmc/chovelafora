@@ -33,4 +33,9 @@ icon.blit(big, (36, 60))
 pygame.image.save(icon, os.path.join(AQUI, "icon-512.png"))
 pygame.image.save(pygame.transform.smoothscale(icon, (192, 192)),
                   os.path.join(AQUI, "icon-192.png"))
+
+# Sprite da Ramona com fundo transparente (tela de abertura do site)
+sprite = pygame.Surface((88, 88), pygame.SRCALPHA)
+spr.draw_ramona(sprite, 44, 52, frame=0, bobbing=False)
+pygame.image.save(sprite, os.path.join(AQUI, "splash-ramona.png"))
 print("icones gerados em", AQUI)

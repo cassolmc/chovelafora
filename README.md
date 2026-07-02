@@ -46,8 +46,9 @@ git add -A && git commit -m "Atualiza build web" && git push
 ```
 
 O `deploy.py` compila com o pygbag numa pasta limpa (só o código do jogo),
-recria `docs/` e injeta o manifest/ícones do PWA no `index.html`.
-Os ícones vêm de `web/` (para regerar: `python web/gen_icons.py`).
+recria `docs/` e injeta no `index.html` o manifest/ícones do PWA e a tela
+de abertura animada (Ramona passeando enquanto carrega). Os ícones e o
+sprite vêm de `web/` (para regerar: `python web/gen_icons.py`).
 
 No GitHub: **Settings → Pages → Source: Deploy from a branch →
 Branch: `main`, pasta `/docs`**.
