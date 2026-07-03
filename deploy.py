@@ -27,6 +27,14 @@ PWA_TAGS = """    <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 """
 
+# Install-only: guarda injetada como PRIMEIRA coisa do <head> do jogo.
+# Se nao estiver rodando como app instalado, volta para a pagina de
+# instalacao ANTES do navegador sequer enxergar os scripts do pygbag -
+# nada pesado (wasm/python/apk) chega a ser baixado.
+GUARD = """<script src="pwa.js"></script><script>
+if (!window.chvPWA || !window.chvPWA.instalado()) location.replace("./");
+</script>"""
+
 # Tela de abertura: cobre o loader feio do pygbag e some sozinha quando o
 # jogo comeca (o SDL redimensiona o #canvas de 1px para o tamanho real).
 # pointer-events:none deixa o toque "vazar" para o pygbag iniciar o jogo.
@@ -160,22 +168,31 @@ def main():
         if os.path.isdir(docs):
             shutil.rmtree(docs)
         shutil.copytree(os.path.join(staging, "build", "web"), docs)
+
+        # Install-only: o index gerado pelo pygbag vira jogo.html; a porta
+        # de entrada do site passa a ser a pagina de instalacao
+        os.replace(os.path.join(docs, "index.html"),
+                   os.path.join(docs, "jogo.html"))
+        shutil.copy2(os.path.join(RAIZ, "web", "install.html"),
+                     os.path.join(docs, "index.html"))
         for arq in ("manifest.json", "icon-192.png", "icon-512.png",
-                    "splash-ramona.png"):
+                    "splash-ramona.png", "pwa.js", "sw.js"):
             shutil.copy2(os.path.join(RAIZ, "web", arq), os.path.join(docs, arq))
 
-        # 4. Injeta as tags do PWA no <head> e a tela de abertura no <body>
-        index = os.path.join(docs, "index.html")
+        # 4. Injeta no jogo.html: guarda install-only, tags do PWA e splash
+        index = os.path.join(docs, "jogo.html")
         with open(index, encoding="utf-8") as f:
             html = f.read()
-        assert "</head>" in html, "index.html sem </head>?"
-        assert "<body>" in html, "index.html sem <body>?"
+        assert "<head><!--" in html, "jogo.html sem o marcador <head> do template?"
+        assert "</head>" in html, "jogo.html sem </head>?"
+        assert "<body>" in html, "jogo.html sem <body>?"
         # Sem "clique para comecar": o jogo inicia sozinho ao terminar de
         # carregar. O audio destrava no primeiro toque natural (botao JOGAR).
         assert "ume_block : 1," in html and "autorun : 0," in html, \
             "config do pygbag mudou? esperava ume_block:1/autorun:0"
         html = html.replace("ume_block : 1,", "ume_block : 0,", 1)
         html = html.replace("autorun : 0,", "autorun : 1,", 1)
+        html = html.replace("<head><!--", "<head>" + GUARD + "<!--", 1)
         html = html.replace("</head>", PWA_TAGS + "</head>", 1)
         html = html.replace("<body>", "<body>\n" + SPLASH, 1)
         with open(index, "w", encoding="utf-8") as f:

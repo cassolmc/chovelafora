@@ -4,12 +4,13 @@ Jogo da Marina e da galinha punk Ramona — 5 fases no sítio da família.
 Feito em Python + Pygame, roda no navegador (desktop e celular) via
 [pygbag](https://pypi.org/project/pygbag/) (WebAssembly).
 
-## Jogar no navegador
+## Jogar (só instalado!)
 
 **https://cassolmc.github.io/chovelafora/**
 
-Funciona no Chrome (desktop e Android) e Safari (iOS). No celular é só
-tocar/arrastar — todas as fases jogam com o dedo.
+O jogo é **install-only**: no navegador comum aparece só a página de
+instalação; o jogo roda apenas como app instalado (PWA em tela cheia).
+No celular é só tocar/arrastar — todas as fases jogam com o dedo.
 
 Repositório: https://github.com/cassolmc/chovelafora
 
@@ -31,10 +32,16 @@ python -m pygbag main.py    # navegador em http://localhost:8000
 
 ## Instalar como app (PWA)
 
-No **Chrome Android**: abra o jogo → menu ⋮ → **"Adicionar à tela inicial"**
-(ou "Instalar app"). No **Safari iOS**: botão compartilhar →
-**"Adicionar à Tela de Início"**. O jogo abre em tela cheia, com ícone
-próprio, como um app nativo.
+- **Chrome/Edge (Android e desktop)**: botão **"Instalar o jogo"** na
+  própria página (via `beforeinstallprompt`).
+- **Safari iOS**: compartilhar → **"Adicionar à Tela de Início"** (a página
+  mostra o passo a passo — iOS não tem prompt de instalação).
+
+Como funciona: `index.html` é a página de instalação; o jogo fica em
+`jogo.html`, protegido por uma guarda (`pwa.js`) no início do `<head>` —
+fora do modo standalone/fullscreen ele volta para a instalação **antes**
+de baixar qualquer coisa pesada. O manifest aponta `start_url` para
+`jogo.html` e o `sw.js` (service worker) dá cache offline básico.
 
 ## Deploy (GitHub Pages)
 
