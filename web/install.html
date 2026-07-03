@@ -11,20 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <script src="pwa.js"></script>
-<script>
-/* Aberto pelo icone (app instalado)? Vai direto para o jogo. */
-if (window.chvPWA && window.chvPWA.instalado()) {
-  location.replace("jogo.html");
-}
-/* Chromium: o beforeinstallprompt pode disparar antes da pagina terminar
-   de carregar - captura o quanto antes e avisa a UI quando ela existir. */
-window._bip = null;
-window.addEventListener("beforeinstallprompt", function (e) {
-  e.preventDefault();
-  window._bip = e;
-  if (window._bipPronto) window._bipPronto();
-});
-</script>
+<script src="install.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
@@ -112,6 +99,22 @@ window.addEventListener("beforeinstallprompt", function (e) {
   @keyframes gira { to { transform: rotate(360deg); } }
   .dica { color: #7a6a30; font-size: .86rem; margin-top: 10px; line-height: 1.35; }
 
+  /* Painel de sucesso / ja instalado */
+  .painel-ok {
+    background: #eaf7e6; border: 2px solid #2a7d2a; border-radius: 14px;
+    padding: 16px 14px; margin-top: 4px;
+  }
+  .painel-ok .check {
+    width: 52px; height: 52px; margin: 0 auto 8px; border-radius: 50%;
+    background: #37a337; color: #fff; font-size: 1.7rem; line-height: 52px;
+    box-shadow: 0 3px 0 #256e25;
+    animation: pop .45s cubic-bezier(.2, 1.6, .4, 1);
+  }
+  @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+  .painel-ok h2 { color: #2a7d2a; font-size: 1.2rem; margin-bottom: 6px; }
+  .painel-ok p { color: #445; font-size: .95rem; line-height: 1.45; }
+  .painel-ok small { color: #778; }
+
   #ios { text-align: left; background: #f0f7ee; border: 2px solid #bcd8b4;
          border-radius: 14px; padding: 14px 16px; margin-top: 4px; }
   #ios p { color: #2a7d2a; margin-bottom: 6px; }
@@ -147,6 +150,12 @@ window.addEventListener("beforeinstallprompt", function (e) {
     <p id="dica" class="dica">A instalação ainda não está disponível.
       Continue na página por alguns segundos (ou toque em algo) e o botão vai liberar.</p>
 
+    <div id="painel-ok" class="painel-ok" hidden>
+      <div class="check" aria-hidden="true">&#10004;</div>
+      <h2 id="painel-titulo"></h2>
+      <p id="painel-msg"></p>
+    </div>
+
     <div id="ios" hidden>
       <p><strong>Para instalar no iPhone/iPad:</strong></p>
       <ol>
@@ -170,73 +179,6 @@ window.addEventListener("beforeinstallprompt", function (e) {
   <div class="grama" aria-hidden="true"></div>
   <div id="walk" aria-hidden="true"><img src="splash-ramona.png" alt=""></div>
 
-<script>
-(function () {
-  "use strict";
 
-  /* Service worker: parte dos requisitos de instalabilidade + fallback offline */
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").catch(function () {});
-  }
-
-  var btn  = document.getElementById("btn");
-  var txt  = document.getElementById("btn-txt");
-  var spin = document.getElementById("spin");
-  var dica = document.getElementById("dica");
-
-  if (window.chvPWA.ehIOS()) {
-    /* iOS Safari nao tem beforeinstallprompt: sem botao, so o passo a passo */
-    btn.hidden  = true;
-    dica.hidden = true;
-    document.getElementById("ios").hidden = false;
-    return;
-  }
-
-  function habilita() {
-    btn.disabled = false;
-    spin.hidden  = true;
-    txt.textContent = "Instalar o jogo";
-    dica.hidden  = true;
-  }
-  function aguardando(mensagem) {
-    btn.disabled = true;
-    spin.hidden  = false;
-    txt.textContent = "Preparando instalação…";
-    dica.hidden  = false;
-    if (mensagem) dica.textContent = mensagem;
-  }
-
-  /* O evento pode ja ter sido capturado no <head>, ou chegar depois */
-  window._bipPronto = habilita;
-  if (window._bip) habilita();
-
-  btn.addEventListener("click", function () {
-    var evento = window._bip;
-    if (!evento) return;
-    window._bip = null;           /* o prompt so pode ser usado uma vez */
-    evento.prompt();
-    evento.userChoice.then(function (escolha) {
-      if (escolha.outcome === "accepted") {
-        spin.hidden  = false;
-        btn.disabled = true;
-        txt.textContent = "Instalando…";
-      } else {
-        /* Recusou: o Chrome pode oferecer de novo mais tarde
-           (o listener do beforeinstallprompt reabilita o botao) */
-        aguardando("Tudo bem! Quando quiser jogar, é só instalar. " +
-                   "O botão libera de novo em instantes.");
-      }
-    });
-  });
-
-  window.addEventListener("appinstalled", function () {
-    spin.hidden  = true;
-    btn.disabled = true;
-    txt.textContent = "Instalado!";
-    dica.hidden = false;
-    dica.textContent = "Agora abra o jogo pelo ícone na tela inicial!";
-  });
-})();
-</script>
 </body>
 </html>

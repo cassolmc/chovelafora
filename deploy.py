@@ -176,7 +176,7 @@ def main():
         shutil.copy2(os.path.join(RAIZ, "web", "install.html"),
                      os.path.join(docs, "index.html"))
         for arq in ("manifest.json", "icon-192.png", "icon-512.png",
-                    "splash-ramona.png", "pwa.js", "sw.js"):
+                    "splash-ramona.png", "pwa.js", "sw.js", "install.js"):
             shutil.copy2(os.path.join(RAIZ, "web", arq), os.path.join(docs, arq))
 
         # 4. Injeta no jogo.html: guarda install-only, tags do PWA e splash
