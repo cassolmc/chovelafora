@@ -1,5 +1,5 @@
 """
-Fase 5 - Anoitecer no Sitio
+Fase 6 - Anoitecer no Sitio
 Visao de cima: o ceu escurece (laranja -> roxo -> preto, sem numero) e a
 Marina precisa levar as 8 galinhas para dentro do galinheiro antes de
 escurecer de vez. Cada galinha tem um comportamento:
@@ -75,7 +75,7 @@ def _cor_escuridao(t):
     return CEU[-1][1], CEU[-1][2]
 
 
-class Fase5Scene(Scene):
+class Fase6Scene(Scene):
     def __init__(self, manager):
         super().__init__(manager)
         self.dialog   = DialogBox()
@@ -122,7 +122,7 @@ class Fase5Scene(Scene):
 
     def _atualiza_hud(self):
         n = sum(g["in"] for g in self.galinhas)
-        self.hud.set_objective(f"Galinhas no galinheiro: {n}/8", "Fase 5 - Anoitecer")
+        self.hud.set_objective(f"Galinhas no galinheiro: {n}/8", "Fase 6 - Anoitecer")
 
     def _intro_done(self):
         self.state = "playing"
@@ -521,7 +521,7 @@ class Fase5Scene(Scene):
                          (SCREEN_W // 2 - 370, SCREEN_H // 2 - 120, 740, 255), 3, border_radius=18)
         fb = pygame.font.SysFont("Segoe UI", 56, bold=True)
         fs = pygame.font.SysFont("Segoe UI", 26)
-        t1 = fb.render("FASE 5 COMPLETA!", True, YELLOW)
+        t1 = fb.render("FASE 6 COMPLETA!", True, YELLOW)
         t2 = fs.render("Todas as galinhas dormem seguras. FIM... por enquanto!", True, WHITE)
         screen.blit(t1, t1.get_rect(center=(SCREEN_W // 2, SCREEN_H // 2 - 62)))
         screen.blit(t2, t2.get_rect(center=(SCREEN_W // 2, SCREEN_H // 2)))

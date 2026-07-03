@@ -1,6 +1,6 @@
 # Sítio Chove Lá Fora
 
-Jogo da Marina e da galinha punk Ramona — 5 fases no sítio da família.
+Jogo da Marina e da galinha punk Ramona — 6 fases no sítio da família.
 Feito em Python + Pygame, roda no navegador (desktop e celular) via
 [pygbag](https://pypi.org/project/pygbag/) (WebAssembly).
 
@@ -27,8 +27,9 @@ python -m pygbag main.py    # navegador em http://localhost:8000
 1. **Xô Gavião!** — clique nos gaviões antes que peguem as galinhas
 2. **O Galinheiro** — arraste as peças e construa o galinheiro com o Gilson
 3. **Galinhas Doentes** — arraste o remédio certo para cada sintoma (3 rodadas)
-4. **Catar os Ovos** — pegue 20 ovos que caem dos ninhos em 90s
-5. **Anoitecer** — leve as 8 galinhas pro galinheiro antes de escurecer
+4. **Achar a Ramona** — labirinto na floresta com a Grazi; cogumelos dão tempo extra
+5. **Catar os Ovos** — pegue 20 ovos que caem dos ninhos em 90s
+6. **Anoitecer** — leve as 8 galinhas pro galinheiro antes de escurecer
 
 ## Instalar como app (PWA)
 

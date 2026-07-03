@@ -9,8 +9,9 @@ from scenes.menu import MenuScene
 from scenes.fase1_bom_dia import Fase1Scene
 from scenes.fase2_galinheiro import Fase2Scene
 from scenes.fase3_doentes import Fase3Scene
-from scenes.fase4_ovos import Fase4Scene
-from scenes.fase5_anoitecer import Fase5Scene
+from scenes.fase4_ramona import Fase4Scene
+from scenes.fase5_ovos import Fase5Scene
+from scenes.fase6_anoitecer import Fase6Scene
 
 
 IS_WEB = sys.platform == "emscripten"
@@ -38,6 +39,7 @@ async def main():
     manager.register("fase3", Fase3Scene)
     manager.register("fase4", Fase4Scene)
     manager.register("fase5", Fase5Scene)
+    manager.register("fase6", Fase6Scene)
 
     manager.go_to("menu")
 

@@ -1,5 +1,5 @@
 """
-Fase 4 - Catar os Ovos
+Fase 5 - Catar os Ovos
 Dentro do galinheiro: as galinhas botam ovos nos ninhos (alturas diferentes)
 e eles caem. Marina se move na horizontal com o cesto e pega os ovos:
   ovo azul pequeno  -> Ganiza
@@ -152,7 +152,7 @@ class Ovo:
                                 (int(self.x) - 5, int(self.y) + 1, 10, 7))
 
 
-class Fase4Scene(Scene):
+class Fase5Scene(Scene):
     def __init__(self, manager):
         super().__init__(manager)
         self.dialog   = DialogBox()
@@ -189,7 +189,7 @@ class Fase4Scene(Scene):
         self.spawn_cd = 1.0
         self.textos   = []
         self.hops     = [0.0] * len(NINHOS)
-        self.hud.set_objective(f"Ovos: 0/{META_OVOS}", "Fase 4 - Catar os Ovos")
+        self.hud.set_objective(f"Ovos: 0/{META_OVOS}", "Fase 5 - Catar os Ovos")
 
     def _intro_done(self):
         self.state = "playing"
@@ -209,7 +209,7 @@ class Fase4Scene(Scene):
 
         elif self.state == "complete" and self.complete:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                self.manager.go_to("fase5")
+                self.manager.go_to("fase6")
 
     # ----------------------------------------------------------------- update
     def _flutua(self, x, y, txt, cor):
@@ -271,7 +271,7 @@ class Fase4Scene(Scene):
                 self.vfx.stars(ovo.x, ovo.y, color=(255, 250, 150))
                 self._flutua(ovo.x, ovo.y - 16, "+1", (140, 255, 140))
                 self.hud.set_objective(
-                    f"Ovos: {self.certos}/{META_OVOS}", "Fase 4 - Catar os Ovos")
+                    f"Ovos: {self.certos}/{META_OVOS}", "Fase 5 - Catar os Ovos")
                 if self.certos >= META_OVOS:
                     self.state = "win_dialog"
                     snd.play('complete')
@@ -430,7 +430,7 @@ class Fase4Scene(Scene):
                          (SCREEN_W // 2 - 370, SCREEN_H // 2 - 120, 740, 255), 3, border_radius=18)
         fb = pygame.font.SysFont("Segoe UI", 56, bold=True)
         fs = pygame.font.SysFont("Segoe UI", 26)
-        t1 = fb.render("FASE 4 COMPLETA!", True, YELLOW)
+        t1 = fb.render("FASE 5 COMPLETA!", True, YELLOW)
         t2 = fs.render(f"Marina catou {META_OVOS} ovos! Que colheita!", True, WHITE)
         screen.blit(t1, t1.get_rect(center=(SCREEN_W // 2, SCREEN_H // 2 - 62)))
         screen.blit(t2, t2.get_rect(center=(SCREEN_W // 2, SCREEN_H // 2)))
