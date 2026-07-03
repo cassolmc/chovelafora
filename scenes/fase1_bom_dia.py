@@ -14,7 +14,7 @@ import engine.sounds as snd
 from constants import *
 import characters.sprites as spr
 
-META_GAVIOES = 12
+META_GAVIOES = 16
 VIDAS_INICIO = 3
 
 DIALOGO_INTRO = [
@@ -29,7 +29,7 @@ DIALOGO_DONE = [
 
 
 class Gaviao:
-    SPEED_BASE = 1.4
+    SPEED_BASE = 1.6
 
     def __init__(self, screen_w, target_x, target_y, nivel=1, force_slow=False):
         self.x = float(random.randint(120, screen_w - 120))
@@ -39,9 +39,9 @@ class Gaviao:
         dy = target_y - self.y
         dist = math.hypot(dx, dy) or 1
         # Velocidade cresce devagar e tem teto de 2.6
-        speed = self.SPEED_BASE + min(nivel, 5) * 0.12 + random.uniform(0, 0.3)
+        speed = self.SPEED_BASE + min(nivel, 5) * 0.15 + random.uniform(0, 0.3)
         if force_slow:
-            speed = min(speed, 1.6)   # gavioes finais mais lentos
+            speed = min(speed, 1.9)   # gavioes finais mais lentos
         self.vx = dx / dist * speed
         self.vy = dy / dist * speed
 
@@ -193,7 +193,7 @@ class Fase1Scene(Scene):
             faltam      = META_GAVIOES - self.score
             voando      = len([g for g in self.gavioes if g.state == "flying"])
             force_slow  = faltam <= 3          # ultimos 3: mais lentos
-            max_tela    = 3 if faltam > 3 else 2   # garante alvos na tela
+            max_tela    = 4 if faltam > 3 else 2   # garante alvos na tela
 
             self.spawn_cd -= dt
             if self.spawn_cd <= 0:
@@ -203,8 +203,8 @@ class Fase1Scene(Scene):
                         Gaviao(SCREEN_W, target[0], target[1], self.nivel, force_slow)
                     )
                 # Cooldown mais longo nos ultimos (mais tempo por alvo)
-                self.spawn_cd = max(1.2 if force_slow else 0.9,
-                                    2.5 - self.score * 0.10)
+                self.spawn_cd = max(1.2 if force_slow else 0.75,
+                                    2.3 - self.score * 0.11)
 
             # Update gavioes
             for gav in self.gavioes:

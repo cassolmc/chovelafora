@@ -27,7 +27,8 @@ DIALOGO_DONE = [
 ]
 
 RODADAS    = 3
-TEMPO_MAX  = 60.0
+TEMPO_MAX  = 45.0
+PENA_ERRO  = 5.0   # remedio errado desconta tempo
 
 # Sintoma -> remedio que cura
 SINTOMAS = ["febre", "frio", "tosse", "barriga", "dodoi"]
@@ -328,6 +329,7 @@ class Fase3Scene(Scene):
                     snd.play('erro')
                     self.err_t   = 0.7
                     self.err_pos = (x, y - 70)
+                    self.timer   = max(0.0, self.timer - PENA_ERRO)
                 return
 
     def _checa_rodada(self):
@@ -475,7 +477,7 @@ class Fase3Scene(Scene):
                 if self.drag and self._rect_paciente(p).collidepoint(self.drag["pos"]):
                     pygame.draw.ellipse(screen, YELLOW, (x - 52, y - 40, 104, 88), 3)
 
-        # X vermelho de remedio errado
+        # X vermelho de remedio errado + desconto de tempo
         if self.err_t > 0:
             ex, ey = self.err_pos
             a = int(255 * min(1.0, self.err_t / 0.4))
@@ -483,6 +485,10 @@ class Fase3Scene(Scene):
             pygame.draw.line(xs, (230, 40, 40, a), (6, 6), (38, 38), 8)
             pygame.draw.line(xs, (230, 40, 40, a), (38, 6), (6, 38), 8)
             screen.blit(xs, (ex - 22, ey - 22))
+            tp = self.font_hint.render(f"-{int(PENA_ERRO)}s", True, (255, 90, 80))
+            ts = self.font_hint.render(f"-{int(PENA_ERRO)}s", True, BLACK)
+            screen.blit(ts, ts.get_rect(center=(ex + 1, ey - 34)))
+            screen.blit(tp, tp.get_rect(center=(ex, ey - 35)))
 
         if self.state in ("playing", "round_ok", "fail"):
             self._draw_bandeja(screen)

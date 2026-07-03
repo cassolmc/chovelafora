@@ -34,20 +34,24 @@ DIALOGO_DONE = [
 # Gerado por recursive backtracker + 3 atalhos; solvabilidade coberta
 # por teste de BFS.
 MAPA = [
-    "###################",
-    "#.............#..R#",
-    "#.###########.#.#.#",
-    "#.....#.....#...#.#",
-    "#.###.#.#.#.#####.#",
-    "#C..#...#.#.......#",
-    "#..####.#.#########",
-    "#M......#.C.......#",
-    "###################",
+    "###############################",
+    "#.........#.......#.....#....R#",
+    "#.#.####..#.#.###.#.#####.#.###",
+    "#.#.........#.#.#.#.#.....#...#",
+    "#.#####.#####.#.#.#.#.#######.#",
+    "#.#...#.....#.#C#.#.#.#.#...#.#",
+    "###.#.#.#####.#.#.#.#.#.#.#.#.#",
+    "#...#.#.#....C#...#.....#.#...#",
+    "#.###.###.#####.#######.#.###.#",
+    "#.#.#...#.#.....#...#...#.#...#",
+    "#.#.###.#.#.#####.#.#####.#.###",
+    "#M#.......#.....C.#.......#...#",
+    "###############################",
 ]
-CELL = 60
+CELL = 40
 OX   = (SCREEN_W - len(MAPA[0]) * CELL) // 2
 OY   = 52
-RAIO = 14   # raio de colisao da Marina
+RAIO = 12   # raio de colisao da Marina (corredores de 40px)
 
 
 def _celula_centro(col, row):
@@ -231,7 +235,7 @@ class Fase4Scene(Scene):
         # Grazi segue a Marina
         gdx, gdy = self.mx - self.gx, self.my - self.gy
         gd = math.hypot(gdx, gdy)
-        if gd > 52:
+        if gd > 42:
             gsp = 200 * dt
             nx, ny = self.gx + gdx / gd * gsp, self.gy + gdy / gd * gsp
             self.gx, self.gy = nx, ny   # a Grazi "conhece o mato": nao trava
@@ -267,23 +271,24 @@ class Fase4Scene(Scene):
     def _render_bg(self, screen):
         """Chao de floresta + paredes do labirinto (estatico, em cache)."""
         w, h = SCREEN_W, SCREEN_H
-        screen.fill((24, 58, 20))
-        # Folhas caidas e graminhas
-        for lx in range(10, w, 42):
+        screen.fill((18, 46, 15))
+        # Folhas caidas
+        for lx in range(10, w, 64):
             ly = (lx * 13) % h
-            cor = ((30, 74, 22), (36, 84, 26), (28, 66, 20))[lx % 3]
-            pygame.draw.ellipse(screen, cor, (lx, ly, 13, 7))
-        for gx in range(0, w, 26):
-            gy = (gx * 7) % h
-            pygame.draw.line(screen, (40, 96, 30), (gx, gy), (gx + 3, gy - 7), 2)
-        # Trilha de terra nas celulas do caminho
+            pygame.draw.ellipse(screen, (26, 60, 20), (lx, ly, 12, 6))
+        # Trilha clara nas celulas do caminho (contraste forte com a mata)
         for r, linha in enumerate(MAPA):
             for c, ch in enumerate(linha):
                 if ch != "#":
-                    pygame.draw.rect(screen, (52, 88, 36),
-                                     (OX + c * CELL + 2, OY + r * CELL + 2, CELL - 4, CELL - 4),
-                                     border_radius=8)
-        # Paredes: arvores, arbustos e pedras (variedade deterministica)
+                    pygame.draw.rect(screen, (96, 126, 58),
+                                     (OX + c * CELL + 1, OY + r * CELL + 1, CELL - 2, CELL - 2),
+                                     border_radius=6)
+                    pygame.draw.ellipse(screen, (112, 138, 66),
+                                        (OX + c * CELL + 8, OY + r * CELL + 10,
+                                         CELL - 16, CELL - 20))
+        # Paredes: arvores, arbustos e pedras (variedade deterministica,
+        # tamanhos proporcionais a celula)
+        s = CELL / 60.0
         for r, linha in enumerate(MAPA):
             for c, ch in enumerate(linha):
                 if ch != "#":
@@ -292,20 +297,24 @@ class Fase4Scene(Scene):
                 y = OY + r * CELL + CELL // 2
                 tipo = (r * 7 + c * 13) % 5
                 if tipo < 2:      # arvore
-                    pygame.draw.rect(screen, (66, 40, 16), (x - 5, y, 10, CELL // 2))
-                    pygame.draw.circle(screen, (16, 68, 14), (x, y - 8), 26)
-                    pygame.draw.circle(screen, (22, 88, 20), (x - 6, y - 14), 18)
+                    pygame.draw.rect(screen, (66, 40, 16),
+                                     (x - int(4 * s) - 1, y, int(8 * s) + 2, CELL // 2))
+                    pygame.draw.circle(screen, (16, 68, 14), (x, y - int(8 * s)), int(26 * s))
+                    pygame.draw.circle(screen, (22, 88, 20),
+                                       (x - int(6 * s), y - int(14 * s)), int(18 * s))
                 elif tipo < 4:    # arbusto
-                    pygame.draw.ellipse(screen, (14, 76, 14), (x - 27, y - 16, 54, 42))
-                    pygame.draw.ellipse(screen, (22, 100, 22), (x - 20, y - 24, 40, 34))
+                    pygame.draw.ellipse(screen, (14, 76, 14),
+                                        (x - int(27 * s), y - int(16 * s), int(54 * s), int(42 * s)))
+                    pygame.draw.ellipse(screen, (22, 100, 22),
+                                        (x - int(20 * s), y - int(24 * s), int(40 * s), int(34 * s)))
                 else:             # pedra
-                    pygame.draw.polygon(screen, (112, 116, 122), [
-                        (x - 22, y + 22), (x - 26, y - 2), (x - 8, y - 20),
-                        (x + 14, y - 16), (x + 24, y + 6), (x + 18, y + 22)])
-                    pygame.draw.polygon(screen, (86, 90, 96), [
-                        (x - 22, y + 22), (x - 26, y - 2), (x - 8, y - 20),
-                        (x + 14, y - 16), (x + 24, y + 6), (x + 18, y + 22)], 2)
-                    pygame.draw.line(screen, (140, 144, 150), (x - 14, y - 8), (x + 2, y - 12), 2)
+                    pts = [(x + int(px * s), y + int(py * s)) for px, py in
+                           ((-22, 22), (-26, -2), (-8, -20), (14, -16), (24, 6), (18, 22))]
+                    pygame.draw.polygon(screen, (112, 116, 122), pts)
+                    pygame.draw.polygon(screen, (86, 90, 96), pts, 2)
+                    pygame.draw.line(screen, (140, 144, 150),
+                                     (x - int(14 * s), y - int(8 * s)),
+                                     (x + int(2 * s), y - int(12 * s)), 2)
         # Placa da entrada
         ex, ey = self.ini
         pygame.draw.rect(screen, (110, 74, 34), (ex - 3, ey + 30, 6, 16))

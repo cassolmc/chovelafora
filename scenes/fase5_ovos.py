@@ -18,7 +18,7 @@ import engine.sounds as snd
 from constants import *
 import characters.sprites as spr
 
-META_OVOS = 20
+META_OVOS = 24
 TEMPO_MAX = 90.0
 CHAO_Y    = 505   # altura onde o ovo espatifa
 
@@ -121,7 +121,7 @@ class Ovo:
         self.tipo  = tipo
         self.x     = float(cx + random.randint(-10, 10))
         self.y     = float(topo + NINHO_H)
-        self.vy    = random.uniform(135, 215) + vel_bonus
+        self.vy    = random.uniform(150, 235) + vel_bonus
         self.ativo = True
         self.break_t = 0.0
 
@@ -245,9 +245,9 @@ class Fase5Scene(Scene):
         self.spawn_cd -= dt
         if self.spawn_cd <= 0:
             i = random.randrange(len(NINHOS))
-            self.ovos.append(Ovo(NINHOS[i], vel_bonus=self.certos * 1.5))
+            self.ovos.append(Ovo(NINHOS[i], vel_bonus=self.certos * 2.0))
             self.hops[i] = 0.35
-            self.spawn_cd = max(0.95, 1.35 - self.certos * 0.015)
+            self.spawn_cd = max(0.85, 1.25 - self.certos * 0.015)
 
         # Timer
         self.timer -= dt

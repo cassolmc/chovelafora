@@ -155,8 +155,10 @@ class Fase2Scene(Scene):
         self.pecas    = []
         self.drag     = None
         self.complete = False
-        self.font_tag = pygame.font.SysFont("Segoe UI", 15, bold=True)
-        self._bg      = None   # fundo estatico em cache
+        self.font_tag  = pygame.font.SysFont("Segoe UI", 15, bold=True)
+        self.font_hint = pygame.font.SysFont("Segoe UI", 22, bold=True)
+        self.hint_t    = 0.0   # aviso "telhado por ultimo"
+        self._bg       = None  # fundo estatico em cache
 
         # Gilson walk-in animation
         self.gilson_x   = float(SCREEN_W + 60)
@@ -217,7 +219,14 @@ class Fase2Scene(Scene):
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 if self.drag:
                     if self.drag["slot"].collidepoint(self.drag["rect"].center):
-                        self._encaixa(self.drag)
+                        # Ordem de obra: o telhado so encaixa com o resto pronto
+                        if self.drag["kind"] == "roof" and not all(
+                                p["encaixado"] for p in self.pecas
+                                if p["kind"] != "roof"):
+                            snd.play('erro')
+                            self.hint_t = 1.8
+                        else:
+                            self._encaixa(self.drag)
                     self.drag = None
 
                     if all(p["encaixado"] for p in self.pecas):
@@ -256,6 +265,7 @@ class Fase2Scene(Scene):
         self.frame += 1
         self.dialog.update(dt)
         self.vfx.update(dt)
+        self.hint_t = max(0.0, self.hint_t - dt)
 
         if self.gilson_x > self.gilson_dst:
             self.gilson_x -= 160 * dt
@@ -420,6 +430,13 @@ class Fase2Scene(Scene):
                     sh.fill((0, 0, 0, 60))
                     screen.blit(sh, (p["rect"].x - 3, p["rect"].bottom + 4))
                 _draw_element(screen, p["kind"], p["rect"])
+
+        # Aviso da ordem de obra
+        if self.hint_t > 0:
+            t  = self.font_hint.render("O telhado vai por ultimo!", True, (255, 230, 90))
+            ts = self.font_hint.render("O telhado vai por ultimo!", True, BLACK)
+            screen.blit(ts, ts.get_rect(center=(607, 189)))
+            screen.blit(t, t.get_rect(center=(606, 188)))
 
         self.vfx.draw(screen)
         self.hud.draw(screen)
