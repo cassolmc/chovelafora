@@ -132,6 +132,8 @@ def init():
         'erro':     _buf([(0, 320), (0.2, 130), (0.45, 230), (0.7, 110), (1, 150)], 0.32, 0.45),
         # Item coletado: ding brilhante
         'ding':     _seq([(1319, 0.06), (1760, 0.20)], 0.40),
+        # Pegou o ovo podre: "wah wah waaah" (trombone triste)
+        'podre':    _seq([(196, 0.15), (165, 0.15), (None, 0.03), (131, 0.34)], 0.45),
         # Galinha curada: cacarejo "co-co-co-COH!"
         'cacarejo': _seq([(587, 0.07), (None, 0.03), (587, 0.07), (None, 0.03),
                           (659, 0.07), (None, 0.04), (880, 0.22)], 0.42),

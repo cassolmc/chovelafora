@@ -25,6 +25,7 @@ CHAO_Y    = 505   # altura onde o ovo espatifa
 DIALOGO_INTRO = [
     ("Mamae",    "Marina! As galinhas botaram! Hora de catar os ovos!"),
     ("Narrador", "Arraste o dedo (ou mouse) em QUALQUER lugar da tela: a Marina segue!"),
+    ("Mamae",    "Cuidado com o ovo PODRE esverdeado: deixa ele cair no chao!"),
 ]
 
 DIALOGO_DONE = [
@@ -37,8 +38,12 @@ OVO_COR = {
     "azul":   ((150, 195, 235), (95, 140, 190)),
     "marrom": ((176, 116, 62),  (124, 78, 36)),
     "branco": ((248, 245, 235), (190, 184, 168)),
+    "podre":  ((158, 168, 96),  (100, 110, 54)),   # pegadinha: nao pegue!
 }
-OVO_TAM = {"azul": (13, 17), "marrom": (19, 25), "branco": (19, 25)}
+OVO_TAM = {"azul": (13, 17), "marrom": (19, 25), "branco": (19, 25),
+           "podre": (19, 25)}
+PODRE_CHANCE  = 0.16   # chance de um ovo sair podre
+PODRE_CASTIGO = 2      # ovos descontados se pegar o podre
 CESTO_COR = ((208, 162, 92), (140, 100, 48))   # cesto de vime
 GALINHA_DONA = {"azul": "Ganiza", "marrom": "Bunda Pelada", "branco": "Bicadona"}
 GALINHA_COR  = {
@@ -59,15 +64,29 @@ NINHOS = [
 NINHO_W, NINHO_H = 104, 72
 
 
-def _draw_ovo(surf, tipo, x, y):
+def _draw_ovo(surf, tipo, x, y, t=0.0):
     w, h = OVO_TAM[tipo]
     cor, borda = OVO_COR[tipo]
     r = pygame.Rect(int(x) - w // 2, int(y) - h // 2, w, h)
-    # Halo claro para destacar o ovo da parede/chao marrom
-    pygame.draw.ellipse(surf, (255, 250, 215), r.inflate(5, 5), 2)
+    # Halo para destacar o ovo da parede/chao marrom (verde se for podre)
+    halo = (185, 215, 130) if tipo == "podre" else (255, 250, 215)
+    pygame.draw.ellipse(surf, halo, r.inflate(5, 5), 2)
     pygame.draw.ellipse(surf, cor, r)
     pygame.draw.ellipse(surf, borda, r, 2)
     pygame.draw.arc(surf, WHITE, (r.x + 2, r.y + 2, w - 6, h - 8), 1.4, 2.6, 2)
+    if tipo == "podre":
+        # Rachadura
+        pygame.draw.lines(surf, borda, False, [
+            (r.x + 3, r.centery), (r.x + 7, r.centery - 4),
+            (r.x + 11, r.centery + 3), (r.x + 16, r.centery - 2)], 2)
+        # Fedorzinho subindo (ondulando)
+        for i in (-1, 1):
+            sx  = int(x) + i * 6
+            off = int(math.sin(t * 7 + i * 2) * 2)
+            pygame.draw.arc(surf, (130, 165, 80),
+                            (sx - 3 + off, r.y - 13, 7, 6), 0, math.pi, 2)
+            pygame.draw.arc(surf, (130, 165, 80),
+                            (sx - 3 - off, r.y - 8, 7, 6), math.pi, 2 * math.pi, 2)
 
 
 def _draw_cesto(surf, cx, cy, s=1.0):
@@ -116,16 +135,18 @@ def _draw_galinha_ninho(surf, tipo, cx, cy, frame, hop=0.0):
 
 
 class Ovo:
-    def __init__(self, ninho, vel_bonus=0.0):
+    def __init__(self, ninho, vel_bonus=0.0, podre=False):
         cx, topo, tipo = ninho
-        self.tipo  = tipo
+        self.tipo  = "podre" if podre else tipo
         self.x     = float(cx + random.randint(-10, 10))
         self.y     = float(topo + NINHO_H)
         self.vy    = random.uniform(150, 235) + vel_bonus
         self.ativo = True
         self.break_t = 0.0
+        self.t     = 0.0   # tempo vivo (anima o fedor do podre)
 
     def update(self, dt):
+        self.t += dt
         if self.ativo:
             self.y += self.vy * dt
         elif self.break_t > 0:
@@ -142,13 +163,14 @@ class Ovo:
 
     def draw(self, surf):
         if self.ativo:
-            _draw_ovo(surf, self.tipo, self.x, self.y)
+            _draw_ovo(surf, self.tipo, self.x, self.y, self.t)
         elif self.break_t > 0:
             cor = OVO_COR[self.tipo][0]
             for dx, dy in ((-8, 3), (5, -1), (0, 6), (-3, -4), (9, 4)):
                 pygame.draw.ellipse(surf, cor,
                                     (int(self.x) + dx - 4, int(self.y) + dy, 10, 6))
-            pygame.draw.ellipse(surf, (255, 235, 140),
+            gema = (146, 166, 66) if self.tipo == "podre" else (255, 235, 140)
+            pygame.draw.ellipse(surf, gema,
                                 (int(self.x) - 5, int(self.y) + 1, 10, 7))
 
 
@@ -245,7 +267,9 @@ class Fase5Scene(Scene):
         self.spawn_cd -= dt
         if self.spawn_cd <= 0:
             i = random.randrange(len(NINHOS))
-            self.ovos.append(Ovo(NINHOS[i], vel_bonus=self.certos * 2.0))
+            # Ovo podre so depois dos primeiros segundos (aprende primeiro)
+            podre = self.timer < TEMPO_MAX - 6 and random.random() < PODRE_CHANCE
+            self.ovos.append(Ovo(NINHOS[i], vel_bonus=self.certos * 2.0, podre=podre))
             self.hops[i] = 0.35
             self.spawn_cd = max(0.85, 1.25 - self.certos * 0.015)
 
@@ -266,6 +290,19 @@ class Fase5Scene(Scene):
                 continue
             if ovo.vy > 0 and basket.colliderect(ovo.rect):
                 ovo.ativo = False
+                if ovo.tipo == "podre":
+                    # Pegadinha! Pegou o podre: perde ovos
+                    ovo.break_t = 0.6
+                    self.certos = max(0, self.certos - PODRE_CASTIGO)
+                    snd.play('podre')
+                    self.vfx.burst(ovo.x, ovo.y, count=12,
+                                   colors=[(150, 180, 80), (110, 140, 60), (190, 210, 120)],
+                                   speed=4, size=4, gravity=60)
+                    self._flutua(ovo.x, ovo.y - 16, f"Eca! -{PODRE_CASTIGO}",
+                                 (180, 220, 90))
+                    self.hud.set_objective(
+                        f"Ovos: {self.certos}/{META_OVOS}", "Fase 5 - Catar os Ovos")
+                    continue
                 self.certos += 1
                 snd.play('ding')
                 self.vfx.stars(ovo.x, ovo.y, color=(255, 250, 150))
@@ -281,7 +318,9 @@ class Fase5Scene(Scene):
             elif ovo.y >= CHAO_Y:
                 ovo.ativo   = False
                 ovo.break_t = 0.6
-                snd.play('erro')
+                # Deixar o podre cair e o CERTO: quebra em silencio
+                if ovo.tipo != "podre":
+                    snd.play('erro')
 
         self.ovos = [o for o in self.ovos if not o.done]
 
@@ -357,6 +396,12 @@ class Fase5Scene(Scene):
         ts = self.font_lbl.render(f"{int(self.timer)}s", True, BLACK)
         screen.blit(ts, ts.get_rect(center=(SCREEN_W // 2 + 1, 65)))
         screen.blit(t, t.get_rect(center=(SCREEN_W // 2, 64)))
+        # Legenda do ovo podre
+        _draw_ovo(screen, "podre", 32, 70, self.frame * 0.016)
+        lg  = self.font_lbl.render(f"= Eca! perde {PODRE_CASTIGO} ovos", True, WHITE)
+        lgs = self.font_lbl.render(f"= Eca! perde {PODRE_CASTIGO} ovos", True, BLACK)
+        screen.blit(lgs, (53, 64))
+        screen.blit(lg, (52, 63))
 
     def draw(self, screen):
         self._draw_bg(screen)

@@ -28,7 +28,7 @@ python -m pygbag main.py    # navegador em http://localhost:8000
 2. **O Galinheiro** — arraste as peças e construa o galinheiro com o Gilson
 3. **Galinhas Doentes** — arraste o remédio certo para cada sintoma (3 rodadas)
 4. **Achar a Ramona** — labirinto na floresta com a Grazi; cogumelos dão tempo extra
-5. **Catar os Ovos** — pegue 20 ovos que caem dos ninhos em 90s
+5. **Catar os Ovos** — pegue 24 ovos que caem dos ninhos em 90s (e deixe o ovo podre cair!)
 6. **Anoitecer** — leve as 8 galinhas pro galinheiro antes de escurecer
 
 ## Instalar como app (PWA)
