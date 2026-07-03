@@ -134,6 +134,9 @@ def init():
         'ding':     _seq([(1319, 0.06), (1760, 0.20)], 0.40),
         # Pegou o ovo podre: "wah wah waaah" (trombone triste)
         'podre':    _seq([(196, 0.15), (165, 0.15), (None, 0.03), (131, 0.34)], 0.45),
+        # Ovo podre caindo: zumbido de mosca (aviso sonoro)
+        'zumbido':  _seq([(98, 0.07), (117, 0.06), (98, 0.07), (121, 0.06),
+                          (98, 0.07), (110, 0.10)], 0.34),
         # Galinha curada: cacarejo "co-co-co-COH!"
         'cacarejo': _seq([(587, 0.07), (None, 0.03), (587, 0.07), (None, 0.03),
                           (659, 0.07), (None, 0.04), (880, 0.22)], 0.42),

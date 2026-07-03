@@ -41,7 +41,7 @@ OVO_COR = {
     "podre":  ((158, 168, 96),  (100, 110, 54)),   # pegadinha: nao pegue!
 }
 OVO_TAM = {"azul": (13, 17), "marrom": (19, 25), "branco": (19, 25),
-           "podre": (19, 25)}
+           "podre": (22, 28)}
 PODRE_CHANCE  = 0.16   # chance de um ovo sair podre
 PODRE_CASTIGO = 2      # ovos descontados se pegar o podre
 CESTO_COR = ((208, 162, 92), (140, 100, 48))   # cesto de vime
@@ -67,26 +67,50 @@ NINHO_W, NINHO_H = 104, 72
 def _draw_ovo(surf, tipo, x, y, t=0.0):
     w, h = OVO_TAM[tipo]
     cor, borda = OVO_COR[tipo]
+    if tipo == "podre":
+        x = x + math.sin(t * 8) * 3    # bamboleia caindo (so o visual)
     r = pygame.Rect(int(x) - w // 2, int(y) - h // 2, w, h)
-    # Halo para destacar o ovo da parede/chao marrom (verde se for podre)
-    halo = (185, 215, 130) if tipo == "podre" else (255, 250, 215)
-    pygame.draw.ellipse(surf, halo, r.inflate(5, 5), 2)
+
+    if tipo == "podre":
+        # Aura verde pulsante: chama o olho de longe
+        pulso = 0.55 + 0.45 * math.sin(t * 6)
+        raio  = int(24 + 7 * pulso)
+        aura  = pygame.Surface((raio * 2, raio * 2), pygame.SRCALPHA)
+        pygame.draw.circle(aura, (130, 220, 60, int(70 + 60 * pulso)),
+                           (raio, raio), raio)
+        pygame.draw.circle(aura, (180, 255, 90, int(40 + 40 * pulso)),
+                           (raio, raio), raio * 2 // 3)
+        surf.blit(aura, (int(x) - raio, int(y) - raio))
+    else:
+        pygame.draw.ellipse(surf, (255, 250, 215), r.inflate(5, 5), 2)
+
     pygame.draw.ellipse(surf, cor, r)
     pygame.draw.ellipse(surf, borda, r, 2)
     pygame.draw.arc(surf, WHITE, (r.x + 2, r.y + 2, w - 6, h - 8), 1.4, 2.6, 2)
+
     if tipo == "podre":
         # Rachadura
         pygame.draw.lines(surf, borda, False, [
-            (r.x + 3, r.centery), (r.x + 7, r.centery - 4),
-            (r.x + 11, r.centery + 3), (r.x + 16, r.centery - 2)], 2)
+            (r.x + 3, r.centery), (r.x + 8, r.centery - 5),
+            (r.x + 13, r.centery + 4), (r.x + 19, r.centery - 2)], 2)
         # Fedorzinho subindo (ondulando)
         for i in (-1, 1):
-            sx  = int(x) + i * 6
+            sx  = int(x) + i * 7
             off = int(math.sin(t * 7 + i * 2) * 2)
-            pygame.draw.arc(surf, (130, 165, 80),
-                            (sx - 3 + off, r.y - 13, 7, 6), 0, math.pi, 2)
-            pygame.draw.arc(surf, (130, 165, 80),
-                            (sx - 3 - off, r.y - 8, 7, 6), math.pi, 2 * math.pi, 2)
+            pygame.draw.arc(surf, (150, 200, 80),
+                            (sx - 3 + off, r.y - 15, 8, 7), 0, math.pi, 2)
+            pygame.draw.arc(surf, (150, 200, 80),
+                            (sx - 3 - off, r.y - 9, 8, 7), math.pi, 2 * math.pi, 2)
+        # Moscas zumbindo em volta
+        for i in range(2):
+            fa = t * 5.5 + i * math.pi
+            fx = int(x + math.cos(fa) * (16 + i * 4))
+            fy = int(y - 4 + math.sin(fa * 2) * 9)
+            pygame.draw.circle(surf, (30, 30, 30), (fx, fy), 2)
+            pygame.draw.line(surf, (110, 110, 110),
+                             (fx - 3, fy - 3), (fx - 1, fy - 1), 1)
+            pygame.draw.line(surf, (110, 110, 110),
+                             (fx + 3, fy - 3), (fx + 1, fy - 1), 1)
 
 
 def _draw_cesto(surf, cx, cy, s=1.0):
@@ -270,6 +294,8 @@ class Fase5Scene(Scene):
             # Ovo podre so depois dos primeiros segundos (aprende primeiro)
             podre = self.timer < TEMPO_MAX - 6 and random.random() < PODRE_CHANCE
             self.ovos.append(Ovo(NINHOS[i], vel_bonus=self.certos * 2.0, podre=podre))
+            if podre:
+                snd.play('zumbido')   # aviso: da pra OUVIR o podre chegando
             self.hops[i] = 0.35
             self.spawn_cd = max(0.85, 1.25 - self.certos * 0.015)
 
@@ -295,9 +321,10 @@ class Fase5Scene(Scene):
                     ovo.break_t = 0.6
                     self.certos = max(0, self.certos - PODRE_CASTIGO)
                     snd.play('podre')
-                    self.vfx.burst(ovo.x, ovo.y, count=12,
+                    self.vfx.flash((120, 170, 50), duration=0.28, alpha=80)
+                    self.vfx.burst(ovo.x, ovo.y, count=20,
                                    colors=[(150, 180, 80), (110, 140, 60), (190, 210, 120)],
-                                   speed=4, size=4, gravity=60)
+                                   speed=5, size=5, gravity=60)
                     self._flutua(ovo.x, ovo.y - 16, f"Eca! -{PODRE_CASTIGO}",
                                  (180, 220, 90))
                     self.hud.set_objective(
