@@ -24,7 +24,7 @@ python -m pygbag main.py    # navegador em http://localhost:8000
 
 ## Fases
 
-1. **Xô Gavião!** — clique nos gaviões antes que peguem as galinhas
+1. **Xô Gavião!** — 5 ondas de gaviões (jovem, veloz, forte, sorrateiro) até o chefe; as galinhas correm e se escondem
 2. **O Galinheiro** — arraste as peças e construa o galinheiro com o Gilson
 3. **Galinhas Doentes** — arraste o remédio certo para cada sintoma (3 rodadas)
 4. **Achar a Ramona** — labirinto na floresta com a Grazi; cogumelos dão tempo extra
